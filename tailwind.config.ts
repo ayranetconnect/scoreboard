@@ -88,10 +88,20 @@ export default {
             height: '0',
           },
         },
+        'ticker-scroll': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+        'spin': {
+          'from': { transform: 'rotate(0deg)' },
+          'to': { transform: 'rotate(360deg)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'ticker-scroll': 'ticker-scroll 60s linear infinite',
+        'spin': 'spin 1s linear infinite',
       },
     },
   },
