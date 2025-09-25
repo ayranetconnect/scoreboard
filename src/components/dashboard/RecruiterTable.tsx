@@ -12,20 +12,13 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUp, ArrowDown, ArrowRight, LineChart } from 'lucide-react';
 import type { Recruiter } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { InsightDialog } from './InsightDialog';
 
-type FilterType = 'all' | 'top25' | 'rising' | 'top10';
-
-const filterConfig: { id: FilterType; label: string }[] = [
-  { id: 'all', label: 'All Recruiters' },
-  { id: 'top25', label: 'Top 25' },
-  { id: 'rising', label: 'Rising Stars' },
-  { id: 'top10', label: 'Top 10' },
-];
+type FilterType = 'all' | 'top25' | 'rising' | 'champions';
 
 function LoadingIndicator() {
   return (
@@ -45,9 +38,9 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
       case 'top25':
         return initialRecruiters.slice(0, 25);
       case 'rising':
-        return [...initialRecruiters].filter(r => r.trendChange > 10).sort((a,b) => b.trendChange - a.trendChange).slice(0, 30);
-      case 'top10':
-        return initialRecruiters.slice(0, 10);
+        return [...initialRecruiters].filter(r => r.performance === "🚀 Rising").sort((a,b) => b.trendChange - a.trendChange);
+      case 'champions':
+        return initialRecruiters.filter(r => r.performance === "🏆 Champion");
       case 'all':
       default:
         return initialRecruiters;
@@ -76,6 +69,16 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
     return '';
   };
 
+  const getPerformanceIcon = (performance: string) => {
+    if (performance.includes("🏆")) return "🏆";
+    if (performance.includes("⭐")) return "⭐";
+    if (performance.includes("🚀")) return "🚀";
+    if (performance.includes("📈")) return "📈";
+    if (performance.includes("➡️")) return "➡️";
+    if (performance.includes("📉")) return "📉";
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -83,19 +86,14 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
           <CardTitle className="flex items-center gap-2">
             <LineChart className="h-6 w-6" /> Recruitment Performance Index
           </CardTitle>
-          <div className="flex flex-wrap gap-2">
-            {filterConfig.map(({ id, label }) => (
-              <Button
-                key={id}
-                variant={activeFilter === id ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleFilterChange(id)}
-                className={cn(activeFilter === id && "bg-primary hover:bg-primary/90 text-primary-foreground")}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
+          <Tabs value={activeFilter} onValueChange={(value) => handleFilterChange(value as FilterType)}>
+            <TabsList>
+              <TabsTrigger value="all">All Recruiters</TabsTrigger>
+              <TabsTrigger value="top25">Top 25</TabsTrigger>
+              <TabsTrigger value="rising">Rising Stars</TabsTrigger>
+              <TabsTrigger value="champions">Champions Club</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </CardHeader>
       <CardContent>
@@ -108,16 +106,17 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                 <TableRow>
                   <TableHead className="w-[80px] text-center">Rank</TableHead>
                   <TableHead>Recruiter</TableHead>
+                  <TableHead className="text-right">Score</TableHead>
+                  <TableHead className="text-right">MTD Selections</TableHead>
                   <TableHead className="text-right">MTD Onboardings</TableHead>
-                  <TableHead className="text-right">Last Month</TableHead>
                   <TableHead className="text-right">Trend</TableHead>
                   <TableHead>Performance</TableHead>
-                  <TableHead className="text-center">Insight</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredRecruiters.map(recruiter => {
                   const Trend = getTrend(recruiter.trendChange);
+                  const performanceIcon = getPerformanceIcon(recruiter.performance);
                   return (
                     <TableRow key={recruiter.id}>
                       <TableCell className={cn('text-center text-lg font-bold', getRankClass(recruiter.rank))}>
@@ -137,8 +136,9 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                           </div>
                         </div>
                       </TableCell>
+                      <TableCell className="text-right font-mono">{recruiter.score}</TableCell>
+                      <TableCell className="text-right">{recruiter.mtdSelections}</TableCell>
                       <TableCell className="text-right">{recruiter.mtdOnboardings}</TableCell>
-                      <TableCell className="text-right">{recruiter.lastMonthScore}</TableCell>
                       <TableCell className={cn('text-right font-semibold', Trend.className)}>
                         <div className="flex items-center justify-end gap-1">
                           <Trend.Icon className="h-4 w-4" />
@@ -146,10 +146,10 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">{recruiter.performance}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <InsightDialog recruiter={recruiter} />
+                        <div className="flex items-center gap-2">
+                           {performanceIcon && <span title={recruiter.performance}>{performanceIcon}</span>}
+                           <span className="font-medium hidden sm:inline">{recruiter.performance.replace(/🏆|⭐|🚀|📈|➡️|📉\s*/, '')}</span>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

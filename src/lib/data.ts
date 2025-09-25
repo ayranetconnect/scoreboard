@@ -54,8 +54,8 @@ while (indianNames.length < 104) {
 }
 
 function calculatePerformance(rank: number, trendChange: number): string {
-    if (rank < 5) return "🏆 Champion";
-    if (rank < 15) return "⭐ Elite";
+    if (rank <= 5) return "🏆 Champion";
+    if (rank <= 15) return "⭐ Elite";
     if (trendChange > 10) return "🚀 Rising";
     if (trendChange > 0) return "📈 Growing";
     if (trendChange > -5) return "➡️ Stable";

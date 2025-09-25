@@ -17,6 +17,7 @@ export default async function DashboardPage() {
 
   const summaryStats: SummaryStat[] = [
     { label: 'Total Recruiters', value: totalRecruiters.toString(), change: '+5 this month', changeType: 'positive' },
+    { label: 'MTD Selections', value: mtdSelections.toLocaleString(), change: '+12.5%', changeType: 'positive' },
     { label: 'MTD Onboardings', value: mtdOnboardings.toLocaleString(), change: '+15.2%', changeType: 'positive' },
     { label: 'Conversion Rate', value: `${conversionRate.toFixed(1)}%`, change: '+2.1%', changeType: 'positive' },
     { label: 'Avg Score', value: avgScore.toString(), change: '+8.7%', changeType: 'positive' },
@@ -30,11 +31,11 @@ export default async function DashboardPage() {
       <div className="flex flex-col">
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 lg:p-8">
           <SummaryCards stats={summaryStats} />
+          <Ticker recruiters={topPerformers} />
           <RewardsBar />
           <RecruiterTable initialRecruiters={recruiters} />
         </main>
       </div>
-      <Ticker recruiters={topPerformers} />
     </div>
   );
 }
