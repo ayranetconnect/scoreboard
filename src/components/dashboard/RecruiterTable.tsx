@@ -138,6 +138,7 @@ export function RecruiterTable({ initialData }: { initialData: Record<string, Pe
                 <TableRow>
                   <TableHead className="w-[80px] text-center">Rank</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead className="text-right">Score</TableHead>
                   <TableHead className="text-right">MTD Onboardings</TableHead>
                   <TableHead className="text-right">Value</TableHead>
                   <TableHead className="text-right">Trend</TableHead>
@@ -167,6 +168,7 @@ export function RecruiterTable({ initialData }: { initialData: Record<string, Pe
                           </div>
                         </div>
                       </TableCell>
+                      <TableCell className="text-right font-bold">{personnel.score}</TableCell>
                       <TableCell className="text-right">{personnel.mtdOnboardings}</TableCell>
                       <TableCell className="text-right font-mono text-primary">{formatCurrency(personnel.onboardingValue)}</TableCell>
                       <TableCell className={cn('text-right font-semibold', Trend.className)}>
