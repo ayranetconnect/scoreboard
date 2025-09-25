@@ -10,14 +10,16 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUp, ArrowDown, ArrowRight, LineChart } from 'lucide-react';
-import type { Recruiter } from '@/lib/types';
+import type { Personnel } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
-type FilterType = 'all' | 'top25' | 'rising' | 'champions';
+type CategoryType = 'recruiters' | 'sourcers' | 'bsm';
+type FilterType = 'all' | 'top10';
 
 function LoadingIndicator() {
   return (
@@ -28,23 +30,19 @@ function LoadingIndicator() {
   );
 }
 
-export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recruiter[] }) {
+export function RecruiterTable({ initialData }: { initialData: Record<string, Personnel[]> }) {
+  const [activeCategory, setActiveCategory] = useState<CategoryType>('recruiters');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [isLoading, setIsLoading] = useState(false);
 
-  const filteredRecruiters = useMemo(() => {
-    switch (activeFilter) {
-      case 'top25':
-        return initialRecruiters.slice(0, 25);
-      case 'rising':
-        return [...initialRecruiters].filter(r => r.performance === "🚀 Rising").sort((a,b) => b.trendChange - a.trendChange);
-      case 'champions':
-        return initialRecruiters.filter(r => r.performance === "🏆 Champion");
-      case 'all':
-      default:
-        return initialRecruiters;
-    }
-  }, [activeFilter, initialRecruiters]);
+  const handleCategoryChange = (category: CategoryType) => {
+    setIsLoading(true);
+    startTransition(() => {
+      setActiveCategory(category);
+      setActiveFilter('all'); // Reset filter when category changes
+      setTimeout(() => setIsLoading(false), 300); // simulate network latency
+    });
+  };
 
   const handleFilterChange = (filter: FilterType) => {
     setIsLoading(true);
@@ -53,6 +51,20 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
       setTimeout(() => setIsLoading(false), 300); // simulate network latency
     });
   };
+
+  const currentData = useMemo(() => {
+    return initialData[activeCategory] || [];
+  }, [activeCategory, initialData]);
+
+  const filteredData = useMemo(() => {
+    switch (activeFilter) {
+      case 'top10':
+        return currentData.slice(0, 10);
+      case 'all':
+      default:
+        return currentData;
+    }
+  }, [activeFilter, currentData]);
 
   const getTrend = (change: number) => {
     if (change > 5) return { Icon: ArrowUp, className: 'trend-up' };
@@ -87,21 +99,33 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
     }).format(value);
   }
 
+  const categoryTitles: Record<CategoryType, string> = {
+    recruiters: 'Recruiters',
+    sourcers: 'Sourcers',
+    bsm: 'BSM'
+  };
+
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <LineChart className="h-6 w-6" /> Recruitment Performance Index
-          </CardTitle>
-          <Tabs value={activeFilter} onValueChange={(value) => handleFilterChange(value as FilterType)}>
-            <TabsList>
-              <TabsTrigger value="all">All Recruiters</TabsTrigger>
-              <TabsTrigger value="top25">Top 25</TabsTrigger>
-              <TabsTrigger value="rising">Rising Stars</TabsTrigger>
-              <TabsTrigger value="champions">Champions Club</TabsTrigger>
-            </TabsList>
-          </Tabs>
+            <div className='flex gap-2'>
+                {Object.keys(categoryTitles).map((cat) => (
+                    <Button
+                        key={cat}
+                        variant={activeCategory === cat ? 'default' : 'outline'}
+                        onClick={() => handleCategoryChange(cat as CategoryType)}
+                    >
+                        {categoryTitles[cat as CategoryType]}
+                    </Button>
+                ))}
+            </div>
+            <Tabs value={activeFilter} onValueChange={(value) => handleFilterChange(value as FilterType)}>
+                <TabsList>
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="top10">Top 10</TabsTrigger>
+                </TabsList>
+            </Tabs>
         </div>
       </CardHeader>
       <CardContent>
@@ -113,9 +137,7 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px] text-center">Rank</TableHead>
-                  <TableHead>Recruiter</TableHead>
-                  <TableHead className="text-right">Score</TableHead>
-                  <TableHead className="text-right">MTD Selections</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead className="text-right">MTD Onboardings</TableHead>
                   <TableHead className="text-right">Value</TableHead>
                   <TableHead className="text-right">Trend</TableHead>
@@ -123,42 +145,40 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRecruiters.map(recruiter => {
-                  const Trend = getTrend(recruiter.trendChange);
-                  const performanceIcon = getPerformanceIcon(recruiter.performance);
+                {filteredData.map(personnel => {
+                  const Trend = getTrend(personnel.trendChange);
+                  const performanceIcon = getPerformanceIcon(personnel.performance);
                   return (
-                    <TableRow key={recruiter.id}>
-                      <TableCell className={cn('text-center text-lg font-bold', getRankClass(recruiter.rank))}>
-                        #{recruiter.rank}
+                    <TableRow key={personnel.id}>
+                      <TableCell className={cn('text-center text-lg font-bold', getRankClass(personnel.rank))}>
+                        #{personnel.rank}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar>
-                            <AvatarImage asChild src={recruiter.avatar}>
-                              <Image src={recruiter.avatar} alt={recruiter.name} width={40} height={40} data-ai-hint={recruiter.avatarHint} />
+                            <AvatarImage asChild src={personnel.avatar}>
+                              <Image src={personnel.avatar} alt={personnel.name} width={40} height={40} data-ai-hint={personnel.avatarHint} />
                             </AvatarImage>
-                            <AvatarFallback>{recruiter.name.charAt(0)}</AvatarFallback>
+                            <AvatarFallback>{personnel.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="font-semibold">{recruiter.name}</div>
-                            <div className="text-xs text-muted-foreground">{recruiter.title}</div>
+                            <div className="font-semibold">{personnel.name}</div>
+                            <div className="text-xs text-muted-foreground">{personnel.title}</div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-mono">{recruiter.score}</TableCell>
-                      <TableCell className="text-right">{recruiter.mtdSelections}</TableCell>
-                      <TableCell className="text-right">{recruiter.mtdOnboardings}</TableCell>
-                      <TableCell className="text-right font-mono text-primary">{formatCurrency(recruiter.onboardingValue)}</TableCell>
+                      <TableCell className="text-right">{personnel.mtdOnboardings}</TableCell>
+                      <TableCell className="text-right font-mono text-primary">{formatCurrency(personnel.onboardingValue)}</TableCell>
                       <TableCell className={cn('text-right font-semibold', Trend.className)}>
                         <div className="flex items-center justify-end gap-1">
                           <Trend.Icon className="h-4 w-4" />
-                          <span>{Math.abs(recruiter.trendChange).toFixed(1)}%</span>
+                          <span>{Math.abs(personnel.trendChange).toFixed(1)}%</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                           {performanceIcon && <span title={recruiter.performance}>{performanceIcon}</span>}
-                           <span className="font-medium hidden sm:inline">{recruiter.performance.replace(/🏆|⭐|🚀|📈|➡️|📉\s*/, '')}</span>
+                           {performanceIcon && <span title={personnel.performance}>{performanceIcon}</span>}
+                           <span className="font-medium hidden sm:inline">{personnel.performance.replace(/🏆|⭐|🚀|📈|➡️|📉\s*/, '')}</span>
                         </div>
                       </TableCell>
                     </TableRow>

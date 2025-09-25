@@ -1,14 +1,22 @@
-import { getRecruiterData } from '@/lib/data';
+import { getRecruiterData, getSourcerData, getBsmData } from '@/lib/data';
 import { Header } from '@/components/dashboard/Header';
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
-import { RewardsBar } from '@/components/dashboard/RewardsBar';
 import { Ticker } from '@/components/dashboard/Ticker';
+import { RewardsBar } from '@/components/dashboard/RewardsBar';
 import { RecruiterTable } from '@/components/dashboard/RecruiterTable';
-import type { SummaryStat } from '@/lib/types';
+import type { SummaryStat, Personnel } from '@/lib/types';
 
 export default async function DashboardPage() {
   const recruiters = await getRecruiterData();
+  const sourcers = await getSourcerData();
+  const bsms = await getBsmData();
 
+  const allPersonnel: Record<string, Personnel[]> = {
+    recruiters,
+    sourcers,
+    bsms,
+  };
+  
   const totalRecruiters = recruiters.length;
   const mtdSelections = recruiters.reduce((sum, r) => sum + r.mtdSelections, 0);
   const mtdOnboardings = recruiters.reduce((sum, r) => sum + r.mtdOnboardings, 0);
@@ -33,7 +41,7 @@ export default async function DashboardPage() {
           <SummaryCards stats={summaryStats} />
           <Ticker recruiters={topPerformers} />
           <RewardsBar />
-          <RecruiterTable initialRecruiters={recruiters} />
+          <RecruiterTable initialData={allPersonnel} />
         </main>
       </div>
     </div>
