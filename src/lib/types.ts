@@ -8,6 +8,7 @@ export type Recruiter = {
   score: number;
   mtdSelections: number;
   mtdOnboardings: number;
+  onboardingValue: number;
   lastMonthScore: number;
   trendChange: number;
   performance: string;

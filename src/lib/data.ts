@@ -64,6 +64,7 @@ function calculatePerformance(rank: number, trendChange: number): string {
 
 function generateRecruiterData(): Recruiter[] {
     const recruiters: Recruiter[] = [];
+    const BASE_ONBOARDING_VALUE = 5000;
     
     for (let i = 0; i < 104; i++) {
         const name = indianNames[i];
@@ -73,6 +74,7 @@ function generateRecruiterData(): Recruiter[] {
         const lastMonthScore = baseScore + Math.floor(Math.random() * 60) - 30;
         const trendChange = lastMonthScore > 0 ? ((baseScore - lastMonthScore) / lastMonthScore * 100) : 0;
         const conversionRate = mtdSelections > 0 ? (mtdOnboardings / mtdSelections) * 100 : 0;
+        const onboardingValue = mtdOnboardings * (BASE_ONBOARDING_VALUE + (Math.random() - 0.5) * 1000);
         
         const avatarData = PlaceHolderImages[i % PlaceHolderImages.length];
 
@@ -86,6 +88,7 @@ function generateRecruiterData(): Recruiter[] {
             score: Math.max(baseScore, 180),
             mtdSelections: Math.max(mtdSelections, 8),
             mtdOnboardings: Math.max(mtdOnboardings, 5),
+            onboardingValue: onboardingValue,
             lastMonthScore: Math.max(lastMonthScore, 150),
             trendChange: trendChange,
             performance: calculatePerformance(i + 1, trendChange),

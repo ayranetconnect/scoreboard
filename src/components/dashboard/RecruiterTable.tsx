@@ -11,12 +11,12 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowUp, ArrowDown, ArrowRight, LineChart } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowRight, LineChart, Sparkles } from 'lucide-react';
 import type { Recruiter } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { InsightDialog } from './InsightDialog';
 
 type FilterType = 'all' | 'top25' | 'rising' | 'champions';
 
@@ -78,6 +78,15 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
     if (performance.includes("📉")) return "📉";
     return null;
   }
+  
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  }
 
   return (
     <Card>
@@ -109,8 +118,10 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                   <TableHead className="text-right">Score</TableHead>
                   <TableHead className="text-right">MTD Selections</TableHead>
                   <TableHead className="text-right">MTD Onboardings</TableHead>
+                  <TableHead className="text-right">Value</TableHead>
                   <TableHead className="text-right">Trend</TableHead>
                   <TableHead>Performance</TableHead>
+                  <TableHead className="text-center">Insight</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -139,6 +150,7 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                       <TableCell className="text-right font-mono">{recruiter.score}</TableCell>
                       <TableCell className="text-right">{recruiter.mtdSelections}</TableCell>
                       <TableCell className="text-right">{recruiter.mtdOnboardings}</TableCell>
+                      <TableCell className="text-right font-mono text-primary">{formatCurrency(recruiter.onboardingValue)}</TableCell>
                       <TableCell className={cn('text-right font-semibold', Trend.className)}>
                         <div className="flex items-center justify-end gap-1">
                           <Trend.Icon className="h-4 w-4" />
@@ -150,6 +162,9 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                            {performanceIcon && <span title={recruiter.performance}>{performanceIcon}</span>}
                            <span className="font-medium hidden sm:inline">{recruiter.performance.replace(/🏆|⭐|🚀|📈|➡️|📉\s*/, '')}</span>
                         </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <InsightDialog recruiter={recruiter} />
                       </TableCell>
                     </TableRow>
                   );
