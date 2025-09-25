@@ -17,7 +17,6 @@ export default async function DashboardPage() {
 
   const summaryStats: SummaryStat[] = [
     { label: 'Total Recruiters', value: totalRecruiters.toString(), change: '+5 this month', changeType: 'positive' },
-    { label: 'MTD Selections', value: mtdSelections.toLocaleString(), change: '+12.5%', changeType: 'positive' },
     { label: 'MTD Onboardings', value: mtdOnboardings.toLocaleString(), change: '+15.2%', changeType: 'positive' },
     { label: 'Conversion Rate', value: `${conversionRate.toFixed(1)}%`, change: '+2.1%', changeType: 'positive' },
     { label: 'Avg Score', value: avgScore.toString(), change: '+8.7%', changeType: 'positive' },

@@ -18,13 +18,13 @@ import type { Recruiter } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { InsightDialog } from './InsightDialog';
 
-type FilterType = 'all' | 'top25' | 'rising' | 'champions';
+type FilterType = 'all' | 'top25' | 'rising' | 'top10';
 
 const filterConfig: { id: FilterType; label: string }[] = [
   { id: 'all', label: 'All Recruiters' },
   { id: 'top25', label: 'Top 25' },
   { id: 'rising', label: 'Rising Stars' },
-  { id: 'champions', label: 'Champions Club' },
+  { id: 'top10', label: 'Top 10' },
 ];
 
 function LoadingIndicator() {
@@ -46,7 +46,7 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
         return initialRecruiters.slice(0, 25);
       case 'rising':
         return [...initialRecruiters].filter(r => r.trendChange > 10).sort((a,b) => b.trendChange - a.trendChange).slice(0, 30);
-      case 'champions':
+      case 'top10':
         return initialRecruiters.slice(0, 10);
       case 'all':
       default:
@@ -108,8 +108,6 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                 <TableRow>
                   <TableHead className="w-[80px] text-center">Rank</TableHead>
                   <TableHead>Recruiter</TableHead>
-                  <TableHead className="text-right">Score</TableHead>
-                  <TableHead className="text-right">MTD Selections</TableHead>
                   <TableHead className="text-right">MTD Onboardings</TableHead>
                   <TableHead className="text-right">Last Month</TableHead>
                   <TableHead className="text-right">Trend</TableHead>
@@ -139,8 +137,6 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-bold text-lg">{recruiter.score.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">{recruiter.mtdSelections}</TableCell>
                       <TableCell className="text-right">{recruiter.mtdOnboardings}</TableCell>
                       <TableCell className="text-right">{recruiter.lastMonthScore}</TableCell>
                       <TableCell className={cn('text-right font-semibold', Trend.className)}>
