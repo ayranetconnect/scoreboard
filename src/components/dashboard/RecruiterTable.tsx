@@ -13,10 +13,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowUp, ArrowDown, ArrowRight, LineChart, Sparkles } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowRight, LineChart } from 'lucide-react';
 import type { Recruiter } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { InsightDialog } from './InsightDialog';
 
 type FilterType = 'all' | 'top25' | 'rising' | 'champions';
 
@@ -121,7 +120,6 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                   <TableHead className="text-right">Value</TableHead>
                   <TableHead className="text-right">Trend</TableHead>
                   <TableHead>Performance</TableHead>
-                  <TableHead className="text-center">Insight</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -162,9 +160,6 @@ export function RecruiterTable({ initialRecruiters }: { initialRecruiters: Recru
                            {performanceIcon && <span title={recruiter.performance}>{performanceIcon}</span>}
                            <span className="font-medium hidden sm:inline">{recruiter.performance.replace(/🏆|⭐|🚀|📈|➡️|📉\s*/, '')}</span>
                         </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <InsightDialog recruiter={recruiter} />
                       </TableCell>
                     </TableRow>
                   );
